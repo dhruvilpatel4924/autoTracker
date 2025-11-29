@@ -152,3 +152,23 @@ def add_maintenance_ui():
 
     session_db.close()
     return render_template("add_maintenance.html", vehicles=vehicles)
+
+# ---------------- Maintenance Report -----------------
+@app.route("/maintenance_report")
+def maintenance_report_ui():
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    session_db = SessionLocal()
+    vehicles = session_db.query(Vehicle).all()
+    vin_selected = request.args.get("vin")
+    logs = []
+    if vin_selected:
+        vehicle = session_db.query(Vehicle).filter_by(vin=vin_selected).first()
+        if vehicle:
+            logs = session_db.query(MaintenanceLog).filter_by(vehicle_id=vehicle.id).order_by(MaintenanceLog.date_created.desc()).all()
+    session_db.close()
+    return render_template("maintenance_report.html", vehicles=vehicles, logs=logs, vin_selected=vin_selected)
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=8000)
