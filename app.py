@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 import os
 import urllib
 
+# NHTSA API
+NHTSA_URL = "https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/{vin}?format=json"
 
 load_dotenv()
 
@@ -37,3 +39,37 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, future=True)
 
 # Create tables if they don't exist
 Base.metadata.create_all(bind=engine)
+
+
+# Hardcoded user
+USER_CRED = {"username": "admin", "password": "password"}
+
+# ---------------- Login -----------------
+@app.route("/", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        if username == USER_CRED["username"] and password == USER_CRED["password"]:
+            session["user"] = username
+            return redirect(url_for("dashboard"))
+        else:
+            flash("Invalid credentials", "danger")
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+# ---------------- Dashboard -----------------
+@app.route("/dashboard")
+def dashboard():
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    session_db = SessionLocal()
+    vehicles = session_db.query(Vehicle).all()
+    session_db.close()
+
+    return render_template("dashboard.html", user=session["user"], vehicles=vehicles)
