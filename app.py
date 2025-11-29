@@ -123,3 +123,32 @@ def add_vehicle_ui():
         return redirect(url_for("dashboard"))
 
     return render_template("add_vehicle.html")
+
+
+# ---------------- Add Maintenance -----------------
+@app.route("/add_maintenance", methods=["GET", "POST"])
+def add_maintenance_ui():
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    session_db = SessionLocal()
+    vehicles = session_db.query(Vehicle).all()
+    if request.method == "POST":
+        vin = request.form.get("vin")
+        mileage = request.form.get("mileage")
+        mtype = request.form.get("type")
+        description = request.form.get("description", "")
+
+        vehicle = session_db.query(Vehicle).filter_by(vin=vin).first()
+        if not vehicle:
+            flash("Vehicle not found", "danger")
+        else:
+            log = MaintenanceLog(vehicle_id=vehicle.id, mileage=int(mileage), type=mtype, description=description)
+            session_db.add(log)
+            session_db.commit()
+            flash("Maintenance log added", "success")
+        session_db.close()
+        return redirect(url_for("dashboard"))
+
+    session_db.close()
+    return render_template("add_maintenance.html", vehicles=vehicles)
