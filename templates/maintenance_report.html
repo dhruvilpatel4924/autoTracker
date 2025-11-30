@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+  <title>Maintenance Report</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+  <h2>Maintenance Report</h2>
+  <form method="get">
+    <div class="mb-3">
+      <label>Select Vehicle</label>
+      <select name="vin" class="form-control" onchange="this.form.submit()">
+        <option value="">--Select--</option>
+        {% for v in vehicles %}
+          <option value="{{ v.vin }}" {% if vin_selected==v.vin %}selected{% endif %}>
+            {{ v.vin }} - {{ v.maker }} {{ v.model }} {{ v.year }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+
+  {% if logs %}
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Mileage</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for l in logs %}
+        <tr>
+          <td>{{ l.id }}</td>
+          <td>{{ l.mileage }}</td>
+          <td>{{ l.type }}</td>
+          <td>{{ l.description }}</td>
+          <td>{{ l.date_created }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    {% if vin_selected %}
+      <p>No maintenance logs for this vehicle.</p>
+    {% endif %}
+  {% endif %}
+
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary mt-2">Back</a>
+</body>
+</html>
