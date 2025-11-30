@@ -7,9 +7,6 @@ from dotenv import load_dotenv
 import os
 import urllib
 
-# NHTSA API
-NHTSA_URL = "https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/{vin}?format=json"
-
 load_dotenv()
 
 app = Flask(__name__)
@@ -22,17 +19,32 @@ app.secret_key = os.getenv("SECRET_KEY", "supersecretkey")  # required for sessi
 
 # ---------- SQL Server (Docker) Connection ----------
 
+# Get varibles from environment file
+server = os.getenv("DB_HOST")
+port = os.getenv("DB_PORT")
+database = os.getenv("DB_NAME")
+username = os.getenv("DB_USER")
+password = os.getenv("DB_PASSWORD")
+
 db_params = urllib.parse.quote_plus(
     "Driver=ODBC Driver 18 for SQL Server;"
-    "Server=localhost,1433;"
-    "Database=CarMaintenanceDB;"
-    "UID=sa;"
-    "PWD=Password1@;"
+    f"Server={server},{port};"
+    f"Database={database};"
+    f"UID={username};"
+    f"PWD={password};"
     "TrustServerCertificate=yes;"
 )
 
-DB_URL = f"mssql+pyodbc:///?odbc_connect={db_params}"
+# db_params = urllib.parse.quote_plus(
+#     "Driver=ODBC Driver 18 for SQL Server;"
+#     "Server=localhost,1433;"
+#     "Database=CarMaintenanceDB;"
+#     "UID=sa;"
+#     "PWD=Password1@;"
+#     "TrustServerCertificate=yes;"
+# )
 
+DB_URL = f"mssql+pyodbc:///?odbc_connect={db_params}"
 
 engine = create_engine(DB_URL, echo=False, future=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, future=True)
@@ -76,6 +88,9 @@ def dashboard():
 
 
 # ---------------- Add Vehicle -----------------
+# NHTSA API
+NHTSA_URL = "https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/{vin}?format=json"
+
 @app.route("/add_vehicle", methods=["GET", "POST"])
 def add_vehicle_ui():
     if "user" not in session:
