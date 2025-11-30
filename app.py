@@ -12,11 +12,6 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "supersecretkey")  # required for sessions
 
-# DB_URL = (
-#     "mssql+pyodbc://sa:Password1@auto-track.citccaogqub3.us-east-1.rds.amazonaws.com:1433/CarMaintenanceDB"
-#     "?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"
-# )
-
 # ---------- SQL Server (Docker) Connection ----------
 
 # Get varibles from environment file
@@ -34,15 +29,6 @@ db_params = urllib.parse.quote_plus(
     f"PWD={password};"
     "TrustServerCertificate=yes;"
 )
-
-# db_params = urllib.parse.quote_plus(
-#     "Driver=ODBC Driver 18 for SQL Server;"
-#     "Server=localhost,1433;"
-#     "Database=CarMaintenanceDB;"
-#     "UID=sa;"
-#     "PWD=Password1@;"
-#     "TrustServerCertificate=yes;"
-# )
 
 DB_URL = f"mssql+pyodbc:///?odbc_connect={db_params}"
 
